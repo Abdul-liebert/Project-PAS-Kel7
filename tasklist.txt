@@ -1,0 +1,5 @@
+Sistem Pendaftaran Acara API:
+
+Izinkan peserta untuk menaftar ke acara.
+Kelola daftar peserta acara (nama,email,nomor telepon,dll.).
+Kirim email ke konfirmasi pendaftaran kepada peserta.
