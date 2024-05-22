@@ -1,4 +1,4 @@
-const user = require('');
+const user = require('./user');
 const { Sequelize, DataTypes } = require('sequelize');
 
 module.exports = (Sequelize, DataTypes)=>{
@@ -22,6 +22,10 @@ module.exports = (Sequelize, DataTypes)=>{
             allowNull : false,
         },
         email:{
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        password:{
             type: DataTypes.STRING,
             allowNull: false,
         },

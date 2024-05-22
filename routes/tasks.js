@@ -7,7 +7,7 @@ const {
     updateTask,
     deleteTask,
     showId
-} = require('../controllers/todoController');
+} = require('../controllers/form');
 const authentication = require('../Middleware/authentication');
 
 router.get('',authentication,getTasks);
