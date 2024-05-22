@@ -1,4 +1,5 @@
 const { user } = require('../models/user.js')
+
 const generateToken = require('../config/generateToken.js')
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {
@@ -10,11 +11,11 @@ const {
 } = require('../config/response')
 
 async function register(req, res) {
+    const { username, email, password } = req.body;
     try {
-        const { username, email, password } = req.body;
-        const existingUser = await user.find({ where: { email } });
+        const existingUser = await user.findOne({ where: { email } });
         if (existingUser) {
-            errorResponse(res, 'User already exists', 400)
+            errorRes(res, 'User already exists', 400)
         }
 
         const hashedPassword = await hashPassword(password)
@@ -37,7 +38,8 @@ async function register(req, res) {
     } catch (error) {
         internalErrorRes(res, error)
     }
-}
+};
+
 
 async function login(req, res) {
     try {
@@ -67,7 +69,7 @@ async function login(req, res) {
         console.error('Error logging in user', user)
         internalErrorRes(res, error)
     }
-}
+};
 
 async function get(req, res) {
     try {
@@ -82,4 +84,20 @@ async function get(req, res) {
         console.error('error fetching user', error)
         internalErrorRes(res, error)
     }
+};
+
+async function logout(req, res) {
+    try {
+        successRes(res, 'Logged out succesfully', null, 200)
+    } catch (error) {
+        console.error('Error logging out user:', error)
+        internalErrorRes(res, error)
+    }
+}
+
+module.exports = {
+    register,
+    login,
+    get,
+    logout
 }
