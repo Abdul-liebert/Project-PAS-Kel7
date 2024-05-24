@@ -1,6 +1,6 @@
-require('sequelize');
+// require('sequelize');
 const {successRes,errorRes,internalErrorRes}=require('../config/response');
-const {tasks, users} = require('../models');
+const {tasks} = require('../db/tables/tasks');
 
 const getTasks = async (req,res) => {
     try{

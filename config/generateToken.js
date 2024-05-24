@@ -11,3 +11,5 @@ const generateToken = (user) => {
         expiresIn: JWT_EXPIRES_IN
     });
 }
+
+module.exports = { generateToken }
