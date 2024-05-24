@@ -8,6 +8,6 @@ const authentication = require('../Middleware/authentication')
 router.post('/register', register)
 router.post('/login', login)
 router.get('/get', authentication, get)
-router.post('/logout', logout)
+// router.post('/logout', logout)
 
 module.exports = router;
