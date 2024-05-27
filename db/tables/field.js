@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config");
 
-const user = sequelize.define('user', {
+const fields = sequelize.define('field', {
     id: {
         allowNull: false,
         autoIncrement: true,
@@ -16,12 +16,23 @@ const user = sequelize.define('user', {
         allowNull: false,
         type: DataTypes.STRING,
     },
-    password: {
+    phone: {
+        type: DataTypes.INTEGER,
         allowNull: false,
+        validate: {
+            len: [0, 12]
+        }
+    },
+    city: {
         type: DataTypes.STRING,
+        allowNull: false,
+    },
+    confirm: {
+        type: DataTypes.STRING,
+        allowNull: false,
     }
 }, {
-    tableName: 'user'
+    tableName: 'field'
 })
 
-module.exports = user;
+module.exports = fields;
