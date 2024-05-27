@@ -17,7 +17,7 @@ const fields = sequelize.define('field', {
         type: DataTypes.STRING,
     },
     phone: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
         allowNull: false,
         validate: {
             len: [0, 12]
@@ -27,7 +27,7 @@ const fields = sequelize.define('field', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    confirm: {
+    company: {
         type: DataTypes.STRING,
         allowNull: false,
     }

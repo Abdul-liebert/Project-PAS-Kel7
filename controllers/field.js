@@ -9,26 +9,16 @@ const {
 } = require('../config/response.js');
 const { fields } = require('../db/tables/field.js');
 
-async function get(req, res) {
-    try {
-        const allFields = await fields.findAll();
-        successRes(res, allFields, 200);
-    } catch (error) {
-        console.error('error: ', error);
-        internalErrorRes(res, error);
+async function registerField(req, res) {
 
-    }
-}
-
-async function register(req, res) {
     const { name, email, phone, city, company } = req.body;
     try {
-        const existingUser = await field.findOne({ where: { email } });
+        const existingUser = await fields.findOne({ where: { email } });
         if (existingUser) {
             errorRes(res, 'User already exists', 400)
         }
 
-        const formField = await field.create({
+        const formField = await fields.create({
             name,
             email,
             phone,
@@ -54,71 +44,100 @@ async function register(req, res) {
     }
 };
 
-async function getField(req, res) {
 
+async function getFields(req, res) {
+    try {
+        const allFields = await fields.findAll();
+        return successRes(res, allFields, 200);
+    } catch (error) {
+        console.error('error: ', error);
+        return internalErrorRes(res, error);
+
+    }
+}
+
+async function getById(req, res) {
+    try {
+        const { id } = req.params
+        const fieldsId = req.params.id;
+        const field = await fields.findByPk(fieldsId);
+
+        if (!field) {
+            return notFoundRes(res, 'fields Not found')
+        }
+
+        return successRes(res, field, 200);
+    } catch (error) {
+        console.error('error: ', error);
+        internalErrorRes(res, error);
+
+    }
 }
 
 
+async function updateFields(req, res) {
+    const { id } = req.params
+    const fieldsId = req.params.id;
+    const { city, company } = req.body;
 
+    try {
+        const field = await fields.update({
+            city,
+            company
+        }, {
+            where: {
+                id,
+                fieldsId
+            }
+        });
 
-// async function login(req, res) {
-//     try {
-//         const { email, password } = req.body;
+        if (!field) {
+            notFoundRes(res, 'field not found ')
+        }
 
-//         const userlog = await user.findOne({ where: { email } })
-//         if (!userlog) {
-//             return notFoundRes(res, 'User not found')
-//         }
+        const updatedField = await fields.update({ city, company }, { where: { id, fieldsId } });
 
-//         const validPassword = await comparePassword(password, userlog.password);
-//         if (!validPassword) {
-//             return errorRes(res, 'invalid password', 401)
-//         }
+        const fieldResponse = {
+            id: field.id,
+            city: field.city,
+            company: field.company,
+        }
 
-//         const userResponse = {
-//             id: userlog.id,
-//             name: userlog.username,
-//             email: userlog.email
-//         }
+        if (!updatedField) {
+            notFoundRes(res, 'field not updated', 400)
+        } else {
+            successRes(res, 'field updated succesfully', fieldResponse, 200)
+        }
+    } catch (error) {
+        console.error(error);
+        internalErrorRes(res, error, 500)
+    }
+}
 
-//         const token = generateToken(userlog);
-//         return successRes(res, 'Logged in successfully', {
-//             user: userResponse,
-//             token
-//         }, 200)
-//     } catch (error) {
-//         console.error('Error logging in user', error)
-//         return internalErrorRes(res, error)
-//     }
-// };
+async function deleteFields(req, res) {
+    const id = req.params;
 
-// async function get(req, res) {
-//     try {
-//         const getUser = await user.findByPk(req.user.id, {
-//             attributes: ['id', 'name', 'email']
-//         });
-//         if (!user) {
-//             errorRes(res, 'user not found', 404)
-//         }
-//         successRes(res, 'user fetched succesfully', getUser, 200)
-//     } catch (error) {
-//         console.error('error fetching user', error)
-//         internalErrorRes(res, error)
-//     }
-// };
+    try {
+        const field = await fields.findOne({ where: { id } })
+        if (!field) {
+            return notFoundRes(res, 'field not found');
+        }
 
-// async function logout(req, res) {
-//     try {
-//         successRes(res, 'Logged out succesfully', null, 200)
-//     } catch (error) {
-//         console.error('Error logging out user:', error)
-//         internalErrorRes(res, error)
-//     }
-// }
+        await field.destroy();
+
+        return successRes(res, 'Field succesfully deleted', null, 200)
+    } catch (error) {
+        console.error(error);
+        return internalErrorRes(res, error, 500)
+
+    }
+}
+
 
 module.exports = {
-    register,
-    login,
-    get,
-    // logout
+    getFields,
+    getById,
+    registerField,
+    updateFields,
+    deleteFields
 }
