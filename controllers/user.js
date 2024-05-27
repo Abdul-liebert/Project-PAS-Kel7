@@ -1,3 +1,19 @@
+
+exports.getUserById = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const user = await User.findByPk(id);
+
+        if (user) {
+            res.status(200).json(user);
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Internal Server Error', error });
+    }
+};
+
 const { generateToken } = require('../config/generateToken.js')
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {
@@ -7,7 +23,7 @@ const {
     notFoundRes,
     internalErrorRes
 } = require('../config/response');
-const user = require('../db/tables/user.js');
+const user = require('../db/tables/tasks.js');
 
 async function register(req, res) {
     const { name, email, password } = req.body;
