@@ -2,7 +2,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config'); // Pastikan Anda telah mengatur koneksi database
 
-const User = sequelize.define('User', {
+
+const fields = sequelize.define('field', {
     id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -17,24 +18,22 @@ const User = sequelize.define('User', {
         allowNull: false
     },
     phone: {
-        type: DataTypes.NUMERIC,
-        allowNull: false
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+            len: [0, 12]
+        }
     },
     city: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: false,
     },
     company: {
         type: DataTypes.STRING,
-        allowNull: false
-    },
-    created_at: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW
+        allowNull: false,
     }
 }, {
-    tableName: 'user',
-    timestamps: false
-});
+    tableName: 'field'
+})
 
-module.exports = User;
+module.exports = fields;
