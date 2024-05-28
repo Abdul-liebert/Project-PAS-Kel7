@@ -1,4 +1,4 @@
-const { generateToken } = require('../config/generateToken.js')
+const { generateToken } = require('../config/generateToken.js');
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {
     successRes,
@@ -8,39 +8,32 @@ const {
     internalErrorRes
 } = require('../config/response.js');
 const { fields } = require('../db/tables/field.js');
+const { users } = require('../db/tables/user.js');
+console.log('fields model: ', fields)
 
 async function registerField(req, res) {
-
+    const userId = req.user.id
     const { name, email, phone, city, company } = req.body;
-    try {
-        const existingUser = await fields.findOne({ where: { email } });
-        if (existingUser) {
-            errorRes(res, 'User already exists', 400)
-        }
+    // console.log(userId)
+    // console.log(name, email, phone, city, company)
 
-        const formField = await fields.create({
+    try {
+        const form = await fields.create({
             name,
             email,
             phone,
             city,
             company
-        });
+        })
 
-        const formResponse = {
-            id: formField.id,
-            name: formField.name,
-            email: formField.email,
-            phone: formField.phone,
-            city: formField.city,
-            company: formField.company,
-            createdAt: formField.createdAt,
-            updatedAt: formField.updateAt,
-        };
-        return successRes(res, 'Register completed succesfully', formResponse, 201)
-
+        if (!form) {
+            return notFoundRes(res, "Form not created", 400)
+        } else {
+            return successRes(res, "Form succesfully created", form, 200)
+        }
     } catch (error) {
-        return internalErrorRes(res, error)
-
+        console.error(error)
+        return internalErrorRes(res, "Internal server Error", error)
     }
 };
 
@@ -58,7 +51,7 @@ async function getFields(req, res) {
 
 async function getById(req, res) {
     try {
-        const { id } = req.params
+
         const fieldsId = req.params.id;
         const field = await fields.findByPk(fieldsId);
 
@@ -76,43 +69,33 @@ async function getById(req, res) {
 
 
 async function updateFields(req, res) {
-    const { id } = req.params
-    const fieldsId = req.params.id;
+    const { id } = req.params;
     const { city, company } = req.body;
 
     try {
-        const field = await fields.update({
-            city,
-            company
-        }, {
-            where: {
-                id,
-                fieldsId
-            }
-        });
-
+        const field = await fields.findOne({ where: { id } });
         if (!field) {
-            notFoundRes(res, 'field not found ')
+            return notFoundRes(res, 'Field not found', 404);
         }
 
-        const updatedField = await fields.update({ city, company }, { where: { id, fieldsId } });
+        const updatedField = await fields.update({ city, company }, { where: { id } });
+
+        if (updatedField[0] === 0) {
+            return notFoundRes(res, 'Field not updated', 400);
+        }
 
         const fieldResponse = {
-            id: field.id,
-            city: field.city,
-            company: field.company,
-        }
+            city: city,
+            company: company,
+        };
 
-        if (!updatedField) {
-            notFoundRes(res, 'field not updated', 400)
-        } else {
-            successRes(res, 'field updated succesfully', fieldResponse, 200)
-        }
+        return successRes(res, 'Field updated successfully', fieldResponse, 200);
     } catch (error) {
         console.error(error);
-        internalErrorRes(res, error, 500)
+        return internalErrorRes(res, error, 500);
     }
 }
+
 
 async function deleteFields(req, res) {
     const id = req.params;
@@ -121,9 +104,11 @@ async function deleteFields(req, res) {
         const field = await fields.findOne({ where: { id } })
         if (!field) {
             return notFoundRes(res, 'field not found');
+        } else {
+
+            await field.destroy();
         }
 
-        await field.destroy();
 
         return successRes(res, 'Field succesfully deleted', null, 200)
     } catch (error) {

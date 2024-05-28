@@ -15,8 +15,6 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors())
-
 app.use(cors());
 
 app.use(logger('dev'));
@@ -26,8 +24,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/index', indexRouter)
-app.use('/field', fieldRouter)
-app.use('/user', usersRouter)
-app.listen();
+app.use('/register', usersRouter)
+app.use('/register/field', fieldRouter)
 
 module.exports = app;

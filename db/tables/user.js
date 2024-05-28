@@ -33,4 +33,5 @@ const users = sequelize.define('user', {
     tableName: 'user'
 })
 
+
 module.exports = users;
