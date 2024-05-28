@@ -10,7 +10,7 @@ const {
 } = require('../config/response')
 
 async function register(req, res) {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
     try {
         const existingUser = await users.findOne({ where: { email } });
         if (existingUser) {
@@ -20,14 +20,14 @@ async function register(req, res) {
         const hashedPassword = await hashPassword(password)
 
         const newUser = await users.create({
-            username,
+            name,
             email,
             password: hashedPassword
         });
 
         const userResponse = {
             id: newUser.id,
-            name: newUser.username,
+            name: newUser.name,
             email: newUser.email,
             createdAt: newUser.createdAt,
             updateAt: newUser.updateAt,
