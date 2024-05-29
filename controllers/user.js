@@ -10,6 +10,7 @@ const {
 } = require('../config/response')
 
 async function register(req, res) {
+    console.log(req.body)
     const { name, email, password } = req.body;
     try {
         const existingUser = await users.findOne({ where: { email } });
@@ -98,4 +99,5 @@ module.exports = {
     register,
     login,
     get,
-    logout}
+    logout
+}
