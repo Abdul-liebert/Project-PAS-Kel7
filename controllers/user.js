@@ -1,19 +1,4 @@
-
-exports.getUserById = async (req, res) => {
-    try {
-        const id = req.params.id;
-        const user = await User.findByPk(id);
-
-        if (user) {
-            res.status(200).json(user);
-        } else {
-            res.status(404).json({ message: 'User not found' });
-        }
-    } catch (error) {
-        res.status(500).json({ message: 'Internal Server Error', error });
-    }
-};
-
+const users = require('../db/tables/user.js')
 const { generateToken } = require('../config/generateToken.js')
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {
@@ -22,20 +7,19 @@ const {
     validErr,
     notFoundRes,
     internalErrorRes
-} = require('../config/response');
-const user = require('../db/tables/tasks.js');
+} = require('../config/response')
 
 async function register(req, res) {
     const { name, email, password } = req.body;
     try {
-        const existingUser = await user.findOne({ where: { email } });
+        const existingUser = await users.findOne({ where: { email } });
         if (existingUser) {
             errorRes(res, 'User already exists', 400)
         }
 
         const hashedPassword = await hashPassword(password)
 
-        const newUser = await user.create({
+        const newUser = await users.create({
             name,
             email,
             password: hashedPassword
@@ -46,13 +30,12 @@ async function register(req, res) {
             name: newUser.name,
             email: newUser.email,
             createdAt: newUser.createdAt,
-            updatedAt: newUser.updateAt,
+            updateAt: newUser.updateAt,
         };
-        return successRes(res, 'Register completed succesfully', userResponse, 201)
+        successRes(res, 'Register completed succesfully', userResponse, 201)
 
     } catch (error) {
-        return internalErrorRes(res, error)
-
+        internalErrorRes(res, error)
     }
 };
 
@@ -60,40 +43,39 @@ async function register(req, res) {
 async function login(req, res) {
     try {
         const { email, password } = req.body;
-
-        const userlog = await user.findOne({ where: { email } })
-        if (!userlog) {
-            return notFoundRes(res, 'User not found')
+        const user = await users.findOne({ where: { email } })
+        if (!user) {
+            notFoundRes(res, 'User not found')
         }
 
-        const validPassword = await comparePassword(password, userlog.password);
+        const validPassword = await comparePassword(password, user.password);
         if (!validPassword) {
-            return errorRes(res, 'invalid password', 401)
+            errorRes(res, 'invalid password', 401)
         }
 
         const userResponse = {
-            id: userlog.id,
-            name: userlog.username,
-            email: userlog.email
+            id: user.id,
+            username: user.username,
+            email: user.email
         }
 
-        const token = generateToken(userlog);
-        return successRes(res, 'Logged in successfully', {
+        const token = generateToken(user);
+        successRes(res, 'Logged in successfully', {
             user: userResponse,
             token
         }, 200)
     } catch (error) {
         console.error('Error logging in user', error)
-        return internalErrorRes(res, error)
+        internalErrorRes(res, error)
     }
 };
 
 async function get(req, res) {
     try {
-        const getUser = await user.findByPk(req.user.id, {
-            attributes: ['id', 'username', 'email']
+        const getUser = await users.findByPk(req.user.id, {
+            attributes: ['id', 'name', 'email']
         });
-        if (!user) {
+        if (!getUser) {
             errorRes(res, 'user not found', 404)
         }
         successRes(res, 'user fetched succesfully', getUser, 200)
@@ -103,18 +85,17 @@ async function get(req, res) {
     }
 };
 
-// async function logout(req, res) {
-//     try {
-//         successRes(res, 'Logged out succesfully', null, 200)
-//     } catch (error) {
-//         console.error('Error logging out user:', error)
-//         internalErrorRes(res, error)
-//     }
-// }
+async function logout(req, res) {
+    try {
+        successRes(res, 'Logged out succesfully', null, 200)
+    } catch (error) {
+        console.error('Error logging out user:', error)
+        internalErrorRes(res, error)
+    }
+}
 
 module.exports = {
     register,
     login,
     get,
-    // logout
-}
+    logout}
