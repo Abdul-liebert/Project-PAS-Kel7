@@ -35,6 +35,17 @@ const fields = sequelize.define('field', {
 }, {
     tableName: 'field',
     timestamps: false
-})
+});
+
+const {senderEmail} =  require('../tables/sender')
+
+fields.hasOne(senderEmail,{
+    foreignKey: 'fieldId',
+    as: 'confirmationEmail'
+});
+senderEmail.belongsTo(fields,{
+    foreignKey : 'fieldId',
+    as: 'user'
+});
 
 module.exports = {fields};

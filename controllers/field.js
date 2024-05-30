@@ -7,11 +7,12 @@ const {
     notFoundRes,
     internalErrorRes
 } = require('../config/response.js');
-const { fields } = require('../db/tables/field.js');
+const { fields,senderEmail } = require('../db/tables/field.js');
+console.log(fields)
 
 async function registerField(req, res) {
 
-    const { name, email, phone, city, company } = req.body;
+    const { name, email, phone, city, company } = req.body; 
     try {
         const existingUser = await fields.findOne({ where: { email } });
         if (existingUser) {
@@ -36,7 +37,16 @@ async function registerField(req, res) {
             // createdAt: formField.createdAt,
             // updatedAt: formField.updateAt,
         };
-        return successRes(res, 'Register completed succesfully', formResponse, 201)
+
+        const confirmationMessage = `Hello ${name},\n\nThank you for registering to this birthday company event`;
+
+        await senderEmail.create({
+            fieldId : formField.id,
+            message : confirmationMessage 
+        });
+
+  
+        return successRes(res, 'Register completed succesfully and confirmation email sent', formResponse, 201)
 
     } catch (error) {
         return internalErrorRes(res, error)
