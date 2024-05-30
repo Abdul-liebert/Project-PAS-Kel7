@@ -1,4 +1,5 @@
 const { generateToken } = require('../config/generateToken.js');
+const mailer = require('../config/mailer.js')
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {
     successRes,
@@ -37,6 +38,44 @@ async function registerField(req, res) {
     }
 };
 
+async function confirmationEmail(res, req) {
+    const { name, email } = req.body;
+    try {
+        const findFieldsEmail = await fields.findAll({ where: { name, email } })
+        const findAdminEmail = await users.findOne({ where: { email } })
+
+        if (!findAdminEmail) {
+            return notFoundRes(res, 'Specified parameters not found')
+        }
+        if (!findFieldsEmail) {
+            return notFoundRes(res, 'Specified parameters not found')
+        }
+
+        const registParams = {
+            name: findFieldsEmail.name,
+            email: findFieldsEmail.email,
+            password: findFieldsEmail.password
+        }
+
+        const adminParams = {
+            email: findAdminEmail.email
+        }
+
+        const information = {
+            from: adminParams.email,
+            to: registParams.email,
+            subject: 'Konfirmasi Pendaftaran',
+            message: `Halo ${registParams.name},\n\n Terima kasih sudah mendaftar, Kami tunggu kehadiran anda \n Salam,\n Panitia Acara`
+        }
+
+        const message = await mailer(information.to, registParams.name)
+
+        return successRes(res, message)
+    } catch (error) {
+        console.error('error: ', error)
+        return internalErrorRes(res, error)
+    }
+}
 
 async function getFields(req, res) {
     try {
@@ -124,5 +163,6 @@ module.exports = {
     getById,
     registerField,
     updateFields,
-    deleteFields
+    deleteFields,
+    confirmationEmail
 }
