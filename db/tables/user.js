@@ -15,7 +15,7 @@ const users = sequelize.define('user', {
     email: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true,
+        unique: true
     },
     password: {
         type: DataTypes.STRING,
@@ -30,7 +30,8 @@ const users = sequelize.define('user', {
         type: DataTypes.DATE
     }
 }, {
-    tableName: 'users'
+    tableName: 'users',
+    timestamps : false
 })
 
-module.exports = users;
+module.exports = {users};

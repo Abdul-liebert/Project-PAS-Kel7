@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/index', indexRouter)
 app.use('/field', fieldRouter)
 app.use('/user', usersRouter)
-app.listen(3006, () => console.log('server is running'));
+app.listen();
 
 
 module.exports = app;

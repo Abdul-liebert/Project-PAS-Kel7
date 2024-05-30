@@ -33,7 +33,8 @@ const fields = sequelize.define('field', {
         allowNull: false,
     }
 }, {
-    tableName: 'field'
+    tableName: 'field',
+    timestamps: false
 })
 
-module.exports = fields;
+module.exports = {fields};

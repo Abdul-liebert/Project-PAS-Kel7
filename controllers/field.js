@@ -33,8 +33,8 @@ async function registerField(req, res) {
             phone: formField.phone,
             city: formField.city,
             company: formField.company,
-            createdAt: formField.createdAt,
-            updatedAt: formField.updateAt,
+            // createdAt: formField.createdAt,
+            // updatedAt: formField.updateAt,
         };
         return successRes(res, 'Register completed succesfully', formResponse, 201)
 
