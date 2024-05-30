@@ -7,14 +7,13 @@ var cors = require('cors');
 
 
 var indexRouter = require('./routes/index');
-var fieldsRouter = require('./routes/field');
+var fieldRouter = require('./routes/field');
+var usersRouter = require('./routes/user');
 require('dotenv').config();
 
 
 
 const app = express();
-
-app.use(cors())
 
 app.use(cors());
 
@@ -25,7 +24,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/index', indexRouter)
-app.use('/fields', fieldsRouter)
-app.listen();
+app.use('/register', usersRouter)
+app.use('/register/field', fieldRouter)
 
 module.exports = app;
