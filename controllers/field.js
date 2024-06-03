@@ -7,18 +7,20 @@ const {
     notFoundRes,
     internalErrorRes
 } = require('../config/response.js');
-const { fields,senderEmail } = require('../db/tables/field.js');
-console.log(fields)
+const { fields } = require('../db/tables/field.js');
+const { senderEmail } = require('../db/tables/sender.js');
 
 async function registerField(req, res) {
-
     const { name, email, phone, city, company } = req.body; 
+
     try {
         const existingUser = await fields.findOne({ where: { email } });
         if (existingUser) {
-            errorRes(res, 'User already exists', 400)
+            // Alamat email sudah ada dalam database, kirim respons kesalahan dan hentikan eksekusi
+            return errorRes(res, 'Email already exists', 400);
         }
 
+        // Buat entri baru dalam tabel fields
         const formField = await fields.create({
             name,
             email,
@@ -27,32 +29,40 @@ async function registerField(req, res) {
             company
         });
 
+        // Buat pesan konfirmasi email
+        const confirmationMessage = `Hello ${formField.name}, Thank you for registering to this birthday company event`;
+
+        const emailRecord =await senderEmail.create({
+            fieldId: formField.id,
+            message: confirmationMessage 
+        });
+
+        // Siapkan respons
         const formResponse = {
             id: formField.id,
             name: formField.name,
             email: formField.email,
             phone: formField.phone,
             city: formField.city,
-            company: formField.company,
-            // createdAt: formField.createdAt,
-            // updatedAt: formField.updateAt,
+            company: formField.company
+        }
+        const emailResponse = {
+
+            fieldId:emailRecord.fieldId,
+            message:emailRecord.message
+
         };
 
-        const confirmationMessage = `Hello ${name},\n\nThank you for registering to this birthday company event`;
+        // Kirim respons berhasil dan hentikan eksekusi
+        return successRes(res, 'Register completed successfully and confirmation email sent', {formResponse, emailResponse} ,201);
 
-        await senderEmail.create({
-            fieldId : formField.id,
-            message : confirmationMessage 
-        });
-
-  
-        return successRes(res, 'Register completed succesfully and confirmation email sent', formResponse, 201)
-
+        
     } catch (error) {
-        return internalErrorRes(res, error)
-
+        // Tangani kesalahan dan kirim respons kesalahan
+        return internalErrorRes(res, error);
     }
 };
+
 
 
 async function getFields(req, res) {

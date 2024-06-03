@@ -10,7 +10,7 @@ const {
 } = require('../controllers/field');
 const authentication = require('../Middleware/authentication');
 
-router.get('', authentication, getFields);
+router.get('/show', authentication, getFields);
 router.get('/:id/show', authentication, getById);
 router.post('/register', authentication, registerField);
 router.put('/:id/update', authentication, updateFields);

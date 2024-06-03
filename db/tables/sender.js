@@ -11,7 +11,7 @@ const senderEmail = sequelize.define('sender',{
     fieldId:{
         type: DataTypes.INTEGER,
         references:{
-            model : 'fields',
+            model : 'field',
             key : 'id'
         },
         onDelete: 'CASCADE'

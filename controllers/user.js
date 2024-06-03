@@ -1,4 +1,4 @@
-const users = require('../db/tables/user.js')
+const {users} = require('../db/tables/user.js')
 const { generateToken } = require('../config/generateToken.js')
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {

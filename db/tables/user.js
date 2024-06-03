@@ -30,8 +30,7 @@ const users = sequelize.define('user', {
         type: DataTypes.DATE
     }
 }, {
-    tableName: 'users',
-    timestamps : false
+    tableName: 'users'
 })
 
 module.exports = {users};
