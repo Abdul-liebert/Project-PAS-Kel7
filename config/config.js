@@ -1,10 +1,13 @@
+const { prototype } = require('nodemailer/lib/dkim');
+
 require('dotenv').config();
 
 const {
   DB_USERNAME,
   DB_NAME,
   DB_PASSWORD,
-  DB_HOSTNAME
+  DB_HOSTNAME,
+  DB_PORT
 } = process.env;
 
 module.exports = {
@@ -27,6 +30,13 @@ module.exports = {
     "password": DB_PASSWORD,
     "database": DB_NAME,
     "host": DB_HOSTNAME,
-    "dialect": "mysql"
+    "dialect": "mysql",
+    "port":DB_PORT || 3306,
+    "pool":{
+      "max":5,
+      "min":0,
+      "acquire":30000,
+      "idle":10000
+    }
   }
 }
