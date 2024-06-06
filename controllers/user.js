@@ -65,6 +65,7 @@ async function login(req, res) {
             user: userResponse,
             token
         }, 200)
+
     } catch (error) {
         console.error('Error logging in user', error)
         internalErrorRes(res, error)

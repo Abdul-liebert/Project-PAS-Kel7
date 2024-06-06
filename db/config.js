@@ -6,4 +6,5 @@ const sequelize = new Sequelize('reg_event', 'root','', {
     dialect: 'mysql'
 });
 
+
 module.exports = sequelize

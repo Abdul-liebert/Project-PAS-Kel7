@@ -1,4 +1,5 @@
-const { generateToken } = require('../config/generateToken.js')
+const { generateToken } = require('../config/generateToken.js');
+const mailer = require('../config/mailer.js')
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {
     successRes,
@@ -16,11 +17,11 @@ async function registerField(req, res) {
     try {
         const existingUser = await fields.findOne({ where: { email } });
         if (existingUser) {
-            // Alamat email sudah ada dalam database, kirim respons kesalahan dan hentikan eksekusi
+
             return errorRes(res, 'Email already exists', 400);
         }
 
-        // Buat entri baru dalam tabel fields
+
         const formField = await fields.create({
             name,
             email,
@@ -29,7 +30,7 @@ async function registerField(req, res) {
             company
         });
 
-        // Buat pesan konfirmasi email
+
         const confirmationMessage = `Hello ${formField.name}, Thank you for registering to this birthday company event`;
 
         const emailRecord =await senderEmail.create({
@@ -37,7 +38,7 @@ async function registerField(req, res) {
             message: confirmationMessage 
         });
 
-        // Siapkan respons
+
         const formResponse = {
             id: formField.id,
             name: formField.name,
@@ -60,9 +61,59 @@ async function registerField(req, res) {
     } catch (error) {
         // Tangani kesalahan dan kirim respons kesalahan
         return internalErrorRes(res, error);
+
+        })
+
+        if (!form) {
+            return notFoundRes(res, "Form not created", 400)
+        } else {
+            return successRes(res, "Form succesfully created", form, 200)
+        }
+    } catch (error) {
+        console.error(error)
+        return internalErrorRes(res, "Internal server Error", error)
+
     }
 };
 
+async function confirmationEmail(res, req) {
+    const { name, email } = req.body;
+    try {
+        const findFieldsEmail = await fields.findAll({ where: { name, email } })
+        const findAdminEmail = await users.findOne({ where: { email } })
+
+        if (!findAdminEmail) {
+            return notFoundRes(res, 'Specified parameters not found')
+        }
+        if (!findFieldsEmail) {
+            return notFoundRes(res, 'Specified parameters not found')
+        }
+
+        const registParams = {
+            name: findFieldsEmail.name,
+            email: findFieldsEmail.email,
+            password: findFieldsEmail.password
+        }
+
+        const adminParams = {
+            email: findAdminEmail.email
+        }
+
+        const information = {
+            from: adminParams.email,
+            to: registParams.email,
+            subject: 'Konfirmasi Pendaftaran',
+            message: `Halo ${registParams.name},\n\n Terima kasih sudah mendaftar, Kami tunggu kehadiran anda \n Salam,\n Panitia Acara`
+        }
+
+        const message = await mailer(information.to, registParams.name)
+
+        return successRes(res, message)
+    } catch (error) {
+        console.error('error: ', error)
+        return internalErrorRes(res, error)
+    }
+}
 
 
 async function getFields(req, res) {
@@ -78,7 +129,7 @@ async function getFields(req, res) {
 
 async function getById(req, res) {
     try {
-        const { id } = req.params
+
         const fieldsId = req.params.id;
         const field = await fields.findByPk(fieldsId);
 
@@ -96,43 +147,33 @@ async function getById(req, res) {
 
 
 async function updateFields(req, res) {
-    const { id } = req.params
-    const fieldsId = req.params.id;
+    const { id } = req.params;
     const { city, company } = req.body;
 
     try {
-        const field = await fields.update({
-            city,
-            company
-        }, {
-            where: {
-                id,
-                fieldsId
-            }
-        });
-
+        const field = await fields.findOne({ where: { id } });
         if (!field) {
-            notFoundRes(res, 'field not found ')
+            return notFoundRes(res, 'Field not found', 404);
         }
 
-        const updatedField = await fields.update({ city, company }, { where: { id, fieldsId } });
+        const updatedField = await fields.update({ city, company }, { where: { id } });
+
+        if (updatedField[0] === 0) {
+            return notFoundRes(res, 'Field not updated', 400);
+        }
 
         const fieldResponse = {
-            id: field.id,
-            city: field.city,
-            company: field.company,
-        }
+            city: city,
+            company: company,
+        };
 
-        if (!updatedField) {
-            notFoundRes(res, 'field not updated', 400)
-        } else {
-            successRes(res, 'field updated succesfully', fieldResponse, 200)
-        }
+        return successRes(res, 'Field updated successfully', fieldResponse, 200);
     } catch (error) {
         console.error(error);
-        internalErrorRes(res, error, 500)
+        return internalErrorRes(res, error, 500);
     }
 }
+
 
 async function deleteFields(req, res) {
     const id = req.params;
@@ -141,9 +182,11 @@ async function deleteFields(req, res) {
         const field = await fields.findOne({ where: { id } })
         if (!field) {
             return notFoundRes(res, 'field not found');
+        } else {
+
+            await field.destroy();
         }
 
-        await field.destroy();
 
         return successRes(res, 'Field succesfully deleted', null, 200)
     } catch (error) {
@@ -159,5 +202,6 @@ module.exports = {
     getById,
     registerField,
     updateFields,
-    deleteFields
+    deleteFields,
+    confirmationEmail
 }

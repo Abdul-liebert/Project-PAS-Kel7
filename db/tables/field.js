@@ -49,3 +49,6 @@ senderEmail.belongsTo(fields,{
 });
 
 module.exports = {fields};
+
+
+
