@@ -1,4 +1,4 @@
-const users = require('../db/tables/user.js')
+const {users} = require('../db/tables/user.js')
 const { generateToken } = require('../config/generateToken.js')
 const { comparePassword, hashPassword } = require('../config/bcrypt.js')
 const {
@@ -10,6 +10,7 @@ const {
 } = require('../config/response')
 
 async function register(req, res) {
+    console.log(req.body)
     const { name, email, password } = req.body;
     try {
         const existingUser = await users.findOne({ where: { email } });

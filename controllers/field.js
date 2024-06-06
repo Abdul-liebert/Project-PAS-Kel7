@@ -9,22 +9,59 @@ const {
     internalErrorRes
 } = require('../config/response.js');
 const { fields } = require('../db/tables/field.js');
-const { users } = require('../db/tables/user.js');
-console.log('fields model: ', fields)
+const { senderEmail } = require('../db/tables/sender.js');
 
 async function registerField(req, res) {
-    const userId = req.user.id
-    const { name, email, phone, city, company } = req.body;
-    // console.log(userId)
-    // console.log(name, email, phone, city, company)
+    const { name, email, phone, city, company } = req.body; 
 
     try {
-        const form = await fields.create({
+        const existingUser = await fields.findOne({ where: { email } });
+        if (existingUser) {
+
+            return errorRes(res, 'Email already exists', 400);
+        }
+
+
+        const formField = await fields.create({
             name,
             email,
             phone,
             city,
             company
+        });
+
+
+        const confirmationMessage = `Hello ${formField.name}, Thank you for registering to this birthday company event`;
+
+        const emailRecord =await senderEmail.create({
+            fieldId: formField.id,
+            message: confirmationMessage 
+        });
+
+
+        const formResponse = {
+            id: formField.id,
+            name: formField.name,
+            email: formField.email,
+            phone: formField.phone,
+            city: formField.city,
+            company: formField.company
+        }
+        const emailResponse = {
+
+            fieldId:emailRecord.fieldId,
+            message:emailRecord.message
+
+        };
+
+        // Kirim respons berhasil dan hentikan eksekusi
+        return successRes(res, 'Register completed successfully and confirmation email sent', {formResponse, emailResponse} ,201);
+
+        
+    } catch (error) {
+        // Tangani kesalahan dan kirim respons kesalahan
+        return internalErrorRes(res, error);
+
         })
 
         if (!form) {
@@ -35,6 +72,7 @@ async function registerField(req, res) {
     } catch (error) {
         console.error(error)
         return internalErrorRes(res, "Internal server Error", error)
+
     }
 };
 
@@ -76,6 +114,7 @@ async function confirmationEmail(res, req) {
         return internalErrorRes(res, error)
     }
 }
+
 
 async function getFields(req, res) {
     try {

@@ -1,20 +1,21 @@
-const { DataTypes } = require("sequelize");
-const sequelize = require("../config");
+// models/user.js
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config'); // Pastikan Anda telah mengatur koneksi database
+
 
 const fields = sequelize.define('field', {
     id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
         type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true
     },
     name: {
-        allowNull: false,
         type: DataTypes.STRING,
+        allowNull: false
     },
     email: {
-        allowNull: false,
         type: DataTypes.STRING,
+        allowNull: false
     },
     phone: {
         type: DataTypes.STRING,
@@ -34,7 +35,20 @@ const fields = sequelize.define('field', {
 }, {
     tableName: 'field',
     timestamps: false
-})
+});
+
+const {senderEmail} =  require('../tables/sender')
+
+fields.hasOne(senderEmail,{
+    foreignKey: 'fieldId',
+    as: 'confirmationEmail'
+});
+senderEmail.belongsTo(fields,{
+    foreignKey : 'fieldId',
+    as: 'user'
+});
+
+module.exports = {fields};
 
 
-module.exports = { fields };
+

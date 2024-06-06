@@ -7,6 +7,7 @@ const {
     get,
     logout
 } = require('../controllers/user');
+// console.log(userController);
 const authentication = require('../Middleware/authentication');
 
 router.post('/register', register);
